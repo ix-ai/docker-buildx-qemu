@@ -7,8 +7,9 @@ variables:
   DOCKERHUB_REPO: jonoh/docker-buildx-qemu
 
 dockerhub-push:
+  depends: build
   script:
-    - echo "$DOCKERHUB_PASSWORD" | base64 --decode | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+    - echo "$DOCKERHUB_PASSWORD" | base64 -d | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
     - docker tag "$CI_REGISTRY_IMAGE" "$DOCKERHUB_REPO:latest"
     - docker push "$DOCKERHUB_REPO"
   only:

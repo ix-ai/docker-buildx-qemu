@@ -27,6 +27,7 @@ build:
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
+    - update-binfmts --enable # Important: Ensures execution of other binary formats is enabled in the kernel
     - docker buildx build --platform linux/arm/v7,local --pull -t "$CI_REGISTRY_IMAGE" --push .
 ```
 

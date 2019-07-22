@@ -8,14 +8,14 @@ It's been tested with GitLab CI on gitlab.com, but it should work anywhere that 
 This GitLab example should give you an idea of how to use the image.
 
 Dockerfile
-```
+```dockerfile
 FROM alpine
 
 RUN echo "Hello, my CPU architecture is $(uname -m)"
 ```
 
 .gitlab-ci.yml
-```
+```yaml
 variables:
   DOCKER_HOST: tcp://docker:2375/
 

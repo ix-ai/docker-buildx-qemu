@@ -2,3 +2,14 @@ include:
   - project: jonohill/gitlab-templates
     file: docker.yml
     ref: 62a7636bf2b74ff39266a90528c4540d3276c1f6
+
+variables:
+  DOCKERHUB_REPO: jonoh/docker-buildx-qemu
+
+dockerhub-push:
+  script:
+    - echo "$DOCKERHUB_PASSWORD" | base64 --decode | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+    - docker tag "$CI_REGISTRY_IMAGE" "$DOCKERHUB_REPO:latest"
+    - docker push "$DOCKERHUB_REPO"
+  only:
+    - master

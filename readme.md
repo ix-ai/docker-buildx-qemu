@@ -1,4 +1,4 @@
-# docker-qemu-arm
+# docker-buildx-qemu
 
 This Debian-based image allows you to easily build cross-platform images.
 It's been tested with GitLab CI on gitlab.com, but it should work anywhere that docker-in-docker already works, and with a binfmt_misc enabled kernel.
@@ -20,7 +20,7 @@ variables:
   DOCKER_HOST: tcp://docker:2375/
 
 build:
-  image: jonoh/docker-qemu-arm
+  image: jonoh/docker-buildx-qemu
   stage: build
   services:
     - docker:dind

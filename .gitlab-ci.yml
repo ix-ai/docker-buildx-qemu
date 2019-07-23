@@ -8,10 +8,11 @@ variables:
 
 dockerhub-push:
   stage: deploy
+  image: "$CI_REGISTRY_IMAGE"
   script:
     - echo "$DOCKERHUB_PASSWORD" | base64 -d | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-    - export DOCKER_VERSION=$(docker run --rm "$CI_REGISTRY_IMAGE" docker --version | perl -pe 's/^.*\s(\d+\.\d+\.\d+.+),.*$/\1/')
-    - export BUILDX_VERSION=$(docker run --rm "$CI_REGISTRY_IMAGE" docker buildx version | perl -pe 's/^.*v?(\d+\.\d+\.\d+).*$/$1/')
+    - export DOCKER_VERSION=$(docker --version | perl -pe 's/^.*\s(\d+\.\d+\.\d+.+),.*$/\1/')
+    - export BUILDX_VERSION=$(docker buildx version | perl -pe 's/^.*v?(\d+\.\d+\.\d+).*$/$1/')
     - docker tag "$CI_REGISTRY_IMAGE" "$DOCKERHUB_REPO:latest"
     - docker tag "$CI_REGISTRY_IMAGE" "$DOCKERHUB_REPO:${DOCKER_VERSION}_${BUILDX_VERSION}"
     - docker push "$DOCKERHUB_REPO"

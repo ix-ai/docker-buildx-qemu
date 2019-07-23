@@ -21,3 +21,6 @@ RUN mkdir -p ~/.docker/cli-plugins && \
         grep "browser_download_url.*linux-arm64" | cut -d : -f 2,3 | tr -d \" | \
     xargs curl -L -o ~/.docker/cli-plugins/docker-buildx && \
     chmod a+x ~/.docker/cli-plugins/docker-buildx
+
+# Write version file
+RUN printf "$(docker --version | perl -pe 's/^.*\s(\d+\.\d+\.\d+.+),.*$/\1/')_$(docker buildx version | perl -pe 's/^.*v?(\d+\.\d+\.\d+).*$/$1/')" > /version

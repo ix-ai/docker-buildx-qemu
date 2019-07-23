@@ -10,7 +10,10 @@ dockerhub-push:
   stage: deploy
   script:
     - echo "$DOCKERHUB_PASSWORD" | base64 -d | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+    - export DOCKER_VERSION=$(docker run --rm "$CI_REGISTRY_IMAGE" docker --version | perl -pe 's/^.*\s(\d+\.\d+\.\d+.+),.*$/\1/')
+    - export BUILDX_VERSION=$(docker run --rm "$CI_REGISTRY_IMAGE" docker buildx version | perl -pe 's/^.*v?(\d+\.\d+\.\d+).*$/$1/')
     - docker tag "$CI_REGISTRY_IMAGE" "$DOCKERHUB_REPO:latest"
+    - docker tag "$CI_REGISTRY_IMAGE" "$DOCKERHUB_REPO:${DOCKER_VERSION}_${BUILDX_VERSION}"
     - docker push "$DOCKERHUB_REPO"
   only:
     - master

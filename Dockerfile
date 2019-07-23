@@ -1,7 +1,5 @@
 FROM debian
 
-ENV BUILDX_VERSION=v0.2.2
-
 # Install Docker and qemu
 # TODO Use docker stable once it properly supports buildx
 RUN apt-get update && apt-get install -y \
@@ -19,6 +17,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install buildx plugin
 RUN mkdir -p ~/.docker/cli-plugins && \
-    curl -L -o ~/.docker/cli-plugins/docker-buildx \
-        https://github.com/docker/buildx/releases/download/${BUILDX_VERSION}/buildx-${BUILDX_VERSION}.linux-amd64 && \
+    curl -s https://api.github.com/repos/docker/buildx/releases/latest | \
+        grep "browser_download_url.*linux-arm64" | cut -d : -f 2,3 | tr -d \" | \
+    xargs curl -L -o ~/.docker/cli-plugins/docker-buildx && \
     chmod a+x ~/.docker/cli-plugins/docker-buildx

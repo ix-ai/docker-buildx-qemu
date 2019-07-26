@@ -23,4 +23,5 @@ RUN mkdir -p ~/.docker/cli-plugins && \
     chmod a+x ~/.docker/cli-plugins/docker-buildx
 
 # Write version file
-RUN printf "$(docker --version | perl -pe 's/^.*\s(\d+\.\d+\.\d+.+),.*$/\1/')_$(docker buildx version | perl -pe 's/^.*v?(\d+\.\d+\.\d+).*$/$1/')" > /version
+RUN printf "$(docker --version | perl -pe 's/^.*\s(\d+\.\d+\.\d+.+),.*$/\1/')_$(docker buildx version | perl -pe 's/^.*v?(\d+\.\d+\.\d+).*$/$1/')" > /version && \
+    cat /version

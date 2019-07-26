@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
 # Install buildx plugin
 RUN mkdir -p ~/.docker/cli-plugins && \
     curl -s https://api.github.com/repos/docker/buildx/releases/latest | \
-        grep "browser_download_url.*linux-arm64" | cut -d : -f 2,3 | tr -d \" | \
+        grep "browser_download_url.*linux-amd64" | cut -d : -f 2,3 | tr -d \" | \
     xargs curl -L -o ~/.docker/cli-plugins/docker-buildx && \
     chmod a+x ~/.docker/cli-plugins/docker-buildx
 

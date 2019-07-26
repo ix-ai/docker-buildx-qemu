@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
         gnupg2 \
         software-properties-common && \
     curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
-    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable test" && \
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" && \
     apt-get update && apt-get install -y \
         docker-ce-cli \
         binfmt-support \
@@ -23,5 +23,5 @@ RUN mkdir -p ~/.docker/cli-plugins && \
     chmod a+x ~/.docker/cli-plugins/docker-buildx
 
 # Write version file
-RUN printf "$(docker --version | perl -pe 's/^.*\s(\d+\.\d+\.\d+.+),.*$/\1/')_$(docker buildx version | perl -pe 's/^.*v?(\d+\.\d+\.\d+).*$/$1/')" > /version && \
+RUN printf "$(docker --version | perl -pe 's/^.*\s(\d+\.\d+\.\d+.*),.*$/$1/')_$(docker buildx version | perl -pe 's/^.*v?(\d+\.\d+\.\d+).*$/$1/')" > /version && \
     cat /version

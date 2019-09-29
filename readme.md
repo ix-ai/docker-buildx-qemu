@@ -17,21 +17,31 @@ RUN echo "Hello, my CPU architecture is $(uname -m)"
 .gitlab-ci.yml
 ```yaml
 variables:
-  DOCKER_HOST: tcp://docker:2375/
+  CI_BUILD_ARCHS: "linux/arm/v7,linux/arm64,linux/amd64"
+  CI_BUILD_IMAGE: "registry.gitlab.com/ericvh/docker-buildx-qemu"
 
 build:
-  image: jonoh/docker-buildx-qemu
+  image: $CI_BUILD_IMAGE
   stage: build
   services:
-    - docker:dind
+    - name: docker:dind
+      entrypoint: ["env", "-u", "DOCKER_HOST"]
+      command: ["dockerd-entrypoint.sh"]
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_DRIVER: overlay2
+    # See https://github.com/docker-library/docker/pull/166
+    DOCKER_TLS_CERTDIR: ""
+  retry: 2
   before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
     # Use docker-container driver to allow useful features (push/multi-platform)
-    - docker buildx create --driver docker-container --use
-    - docker buildx inspect --bootstrap    
-  script:
     - update-binfmts --enable # Important: Ensures execution of other binary formats is enabled in the kernel
-    - docker buildx build --platform linux/arm/v7,local --pull -t "$CI_REGISTRY_IMAGE" --push .
+    - docker buildx create --driver docker-container --use
+    - docker buildx inspect --bootstrap
+  script:
+    - docker buildx ls
+    - docker buildx build --platform $CI_BUILD_ARCHS --progress plain --pull -t "$CI_REGISTRY_IMAGE" --push .
 ```
 
 And the (partial) output:

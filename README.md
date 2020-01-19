@@ -1,7 +1,12 @@
 # docker-buildx-qemu
 
+[![Pipeline Status](https://gitlab.com/ix.ai/docker-buildx-qemu/badges/master/pipeline.svg)](https://gitlab.com/ix.ai/docker-buildx-qemu/)
+[![Docker Stars](https://img.shields.io/docker/stars/ixdotai/docker-buildx-qemu.svg)](https://hub.docker.com/r/ixdotai/docker-buildx-qemu/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/ixdotai/docker-buildx-qemu.svg)](https://hub.docker.com/r/ixdotai/docker-buildx-qemu/)
+[![Gitlab Project](https://img.shields.io/badge/GitLab-Project-554488.svg)](https://gitlab.com/ix.ai/docker-buildx-qemu/)
+
 This Debian-based image allows you to easily build cross-platform images.
-It's been tested with GitLab CI on gitlab.com, but it should work anywhere that docker-in-docker already works, and with a binfmt_misc enabled kernel.
+It's been tested with GitLab CI on gitlab.com, but it should work anywhere that docker-in-docker already works, and with a `binfmt_misc` enabled kernel.
 
 ## Example Usage
 
@@ -56,3 +61,11 @@ And the (partial) output:
 #8 0.233 Hello, my CPU architecture is armv7l
 #8 DONE 0.2s
 ```
+
+## Resources:
+* GitLab: https://gitlab.com/ix.ai/docker-buildx-qemu
+* GitHub: https://github.com/ix-ai/docker-buildx-qemu
+* Docker Hub: https://hub.docker.com/r/ixdotai/docker-buildx-qemu
+
+## Credits:
+This work is based on [ericvh/docker-buildx-qemu](https://gitlab.com/ericvh/docker-buildx-qemu)

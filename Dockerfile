@@ -1,4 +1,7 @@
 FROM debian
+LABEL maintainer="docker@ix.ai"
+ENV DEBIAN_FRONTEND=noninteractive TERM=linux
+
 # Install Docker and qemu
 # TODO Use docker stable once it properly supports buildx
 RUN apt-get update && apt-get install -y --no-install-recommends \

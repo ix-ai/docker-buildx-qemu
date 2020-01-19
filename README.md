@@ -42,6 +42,8 @@ build:
   script:
     - docker buildx ls
     - docker buildx build --platform $CI_BUILD_ARCHS --progress plain --pull -t "$CI_REGISTRY_IMAGE" --push .
+  after_script:
+    - docker build rm
 ```
 
 And the (partial) output:

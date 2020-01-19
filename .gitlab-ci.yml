@@ -2,7 +2,7 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKERHUB_REPO_PREFIX: ixdotai
   DOCKERHUB_REPO_NAME: docker-buildx-qemu
-  ENABLE_ARM64: 'true'
+  ENABLE_ARM64: 'false'
   ENABLE_ARMv7: 'false'
 
 include:

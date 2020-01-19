@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         docker-ce-cli \
         binfmt-support \
         qemu-user-static && \
-    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install buildx plugin
 RUN mkdir -p ~/.docker/cli-plugins && \

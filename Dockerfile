@@ -1,7 +1,7 @@
 FROM debian
 # Install Docker and qemu
 # TODO Use docker stable once it properly supports buildx
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
         apt-transport-https \
         ca-certificates \
         curl \
@@ -9,10 +9,11 @@ RUN apt-get update && apt-get install -y \
         software-properties-common && \
     curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
     add-apt-repository "deb https://download.docker.com/linux/debian $(lsb_release -cs) stable" && \
-    apt-get update && apt-get install -y \
+    apt-get update && apt-get install -y  --no-install-recommends \
         docker-ce-cli \
         binfmt-support \
-        qemu-user-static
+        qemu-user-static && \
+    rm -rf /var/lib/apt/lists/* && \
 
 # Install buildx plugin
 RUN mkdir -p ~/.docker/cli-plugins && \

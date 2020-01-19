@@ -3,7 +3,7 @@ variables:
   DOCKERHUB_REPO_PREFIX: ixdotai
   DOCKERHUB_REPO_NAME: docker-buildx-qemu
   ENABLE_ARM64: 'true'
-  ENABLE_ARMv7: 'true'
+  ENABLE_ARMv7: 'false'
 
 include:
   - project: 'ix.ai/ci-templates'

@@ -23,7 +23,7 @@ RUN echo "Hello, my CPU architecture is $(uname -m)"
 ```yaml
 variables:
   CI_BUILD_ARCHS: "linux/arm/v7,linux/arm64,linux/amd64"
-  CI_BUILD_IMAGE: "registry.gitlab.com/ericvh/docker-buildx-qemu"
+  CI_BUILD_IMAGE: "ixdotai/docker-buildx-qemu:latest"
 
 build:
   image: $CI_BUILD_IMAGE

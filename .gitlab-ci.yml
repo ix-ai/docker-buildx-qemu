@@ -1,6 +1,10 @@
-include:
-  - project: 'ericvh/gitlab-ci-arm-template'
-    file: '/.gitlab-ci.yml'
-
 variables:
-  CI_BUILD_ARCHS: "linux/amd64,linux/arm64"
+  DOCKER_DRIVER: overlay2
+  DOCKERHUB_REPO_PREFIX: ixdotai
+  DOCKERHUB_REPO_NAME: docker-buildx-qemu
+  ENABLE_ARM64: 'true'
+  ENABLE_ARMv7: 'true'
+
+include:
+  - project: 'ix.ai/ci-templates'
+    file: '/common.yml'

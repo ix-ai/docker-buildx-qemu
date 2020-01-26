@@ -1,5 +1,7 @@
-FROM debian
-LABEL maintainer="docker@ix.ai"
+FROM debian:latest
+LABEL maintainer="docker@ix.ai" \
+      ai.ix.repository="ix.ai/csp"
+
 ENV DEBIAN_FRONTEND=noninteractive TERM=linux
 
 # Upgrades the image, Installs docker and qemu, installs buildx plugin and prints the version to the file

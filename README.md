@@ -67,7 +67,6 @@ And the (partial) output:
 * GitLab: https://gitlab.com/ix.ai/docker-buildx-qemu
 * GitHub: https://github.com/ix-ai/docker-buildx-qemu
 * Docker Hub: https://hub.docker.com/r/ixdotai/docker-buildx-qemu
-* Quay: https://quay.io/repository/ix.ai/docker-buildx-qemu
 
 ## Credits:
 This work is based on [ericvh/docker-buildx-qemu](https://gitlab.com/ericvh/docker-buildx-qemu)

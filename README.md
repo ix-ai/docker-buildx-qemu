@@ -3,7 +3,6 @@
 [![Pipeline Status](https://gitlab.com/ix.ai/docker-buildx-qemu/badges/master/pipeline.svg)](https://gitlab.com/ix.ai/docker-buildx-qemu/)
 [![Docker Stars](https://img.shields.io/docker/stars/ixdotai/docker-buildx-qemu.svg)](https://hub.docker.com/r/ixdotai/docker-buildx-qemu/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/ixdotai/docker-buildx-qemu.svg)](https://hub.docker.com/r/ixdotai/docker-buildx-qemu/)
-[![Docker Repository on Quay](https://quay.io/repository/ix.ai/docker-buildx-qemu/status "Docker Repository on Quay")](https://quay.io/repository/ix.ai/docker-buildx-qemu)
 [![Gitlab Project](https://img.shields.io/badge/GitLab-Project-554488.svg)](https://gitlab.com/ix.ai/docker-buildx-qemu/)
 
 This Debian-based image allows you to easily build cross-platform images.

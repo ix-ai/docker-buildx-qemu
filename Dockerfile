@@ -1,6 +1,6 @@
 FROM debian:latest
 LABEL maintainer="docker@ix.ai" \
-      ai.ix.repository="ix.ai/csp"
+      ai.ix.repository="ix.ai/docker-buildx-qemu"
 
 ENV DEBIAN_FRONTEND=noninteractive TERM=linux
 

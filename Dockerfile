@@ -11,7 +11,7 @@ RUN apt-get update && apt-get -y dist-upgrade && apt-get install -y --no-install
         ca-certificates \
         curl \
         gnupg2 \
-        software-properties-common && \
+        software-properties-common \
         git && \
     curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
     add-apt-repository "deb https://download.docker.com/linux/debian $(lsb_release -cs) stable" && \

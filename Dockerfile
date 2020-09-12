@@ -45,10 +45,8 @@ RUN set -eux; \
   ; \
   chmod a+x ~/.docker/cli-plugins/docker-buildx; \
   \
-  apt-get remove --purge -y \
+  apt-get autoremove --purge -y \
     apt-transport-https \
-    ca-certificates \
-    curl \
     gnupg2 \
     software-properties-common \
   ; \

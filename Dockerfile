@@ -45,11 +45,6 @@ RUN set -eux; \
   ; \
   chmod a+x ~/.docker/cli-plugins/docker-buildx; \
   \
-  apt-get autoremove --purge -y \
-    apt-transport-https \
-    gnupg2 \
-    software-properties-common \
-  ; \
   apt-get -y --purge autoremove; \
   rm -rf /var/lib/apt/lists/* /var/log/* /var/tmp/* /tmp/*; \
   \

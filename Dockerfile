@@ -46,5 +46,5 @@ RUN set -eux; \
   apt-get -y --purge autoremove; \
   rm -rf /var/lib/apt/lists/* /var/log/* /var/tmp/* /tmp/*; \
   \
-  docker version; \
+  docker --version; \
   docker buildx version

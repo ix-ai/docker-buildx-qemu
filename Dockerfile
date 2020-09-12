@@ -41,7 +41,6 @@ RUN set -eux; \
     apt-transport-https \
     gnupg2 \
     software-properties-common \
-    curl \
   ; \
   apt-get -y --purge autoremove; \
   rm -rf /var/lib/apt/lists/* /var/log/* /var/tmp/* /tmp/*; \

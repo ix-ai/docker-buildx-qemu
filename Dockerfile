@@ -1,6 +1,14 @@
-FROM debian:latest
+FROM debian:stable-slim
 LABEL maintainer="docker@ix.ai" \
       ai.ix.repository="ix.ai/docker-buildx-qemu"
+
+ENV DOCKER_DRIVER="overlay2" \
+    DOCKER_TLS_CERTDIR="/certs" \
+    DOCKER_CERT_PATH="/certs/client" \
+    DOCKER_TLS='true' \
+    DOCKER_HOST="tcp://docker:2376/" \
+    DOCKER_CLI_EXPERIMENTAL='enabled' \
+    DOCKER_BUILD_KIT='1'
 
 # Upgrades the image, Installs docker and qemu, installs buildx plugin and prints the version to the file
 # TODO Use docker stable once it properly supports buildx
@@ -47,5 +55,5 @@ RUN set -eux; \
   apt-get -y --purge autoremove; \
   rm -rf /var/lib/apt/lists/* /var/log/* /var/tmp/* /tmp/*; \
   \
-  docker --version; \
+  docker version; \
   docker buildx version

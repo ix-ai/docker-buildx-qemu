@@ -3,10 +3,21 @@
 [![Pipeline Status](https://gitlab.com/ix.ai/docker-buildx-qemu/badges/master/pipeline.svg)](https://gitlab.com/ix.ai/docker-buildx-qemu/)
 [![Docker Stars](https://img.shields.io/docker/stars/ixdotai/docker-buildx-qemu.svg)](https://hub.docker.com/r/ixdotai/docker-buildx-qemu/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/ixdotai/docker-buildx-qemu.svg)](https://hub.docker.com/r/ixdotai/docker-buildx-qemu/)
+[![Docker Image Version (latest)](https://img.shields.io/docker/v/ixdotai/docker-buildx-qemu/latest)](https://hub.docker.com/r/ixdotai/docker-buildx-qemu/)
+[![Docker Image Size (latest)](https://img.shields.io/docker/image-size/ixdotai/docker-buildx-qemu/latest)](https://hub.docker.com/r/ixdotai/docker-buildx-qemu/)
 [![Gitlab Project](https://img.shields.io/badge/GitLab-Project-554488.svg)](https://gitlab.com/ix.ai/docker-buildx-qemu/)
 
-This Debian-based image allows you to easily build cross-platform images.
+This Debian-slim-based image allows you to easily build cross-platform images.
 It's been tested with GitLab CI on gitlab.com, but it should work anywhere that docker-in-docker already works, and with a `binfmt_misc` enabled kernel.
+
+The `ixdotai/docker-buildx-qemu` image supports the following architectures:
+* `amd64`
+* `arm64`
+
+The following additional tools are installed, to be used in your pipelines:
+* `curl`
+* `git`
+* `jq`
 
 ## Example Usage
 
@@ -22,6 +33,12 @@ RUN echo "Hello, my CPU architecture is $(uname -m)"
 .gitlab-ci.yml
 ```yaml
 variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_CERT_PATH: "/certs/client"
+  DOCKER_TLS: 'true'
+  DOCKER_HOST: tcp://docker:2376/
+  BUILDKIT_INLINE_CACHE: '1'
+  DOCKER_DRIVER: overlay2
   CI_BUILD_ARCHS: "linux/arm/v7,linux/arm64,linux/amd64"
   CI_BUILD_IMAGE: "ixdotai/docker-buildx-qemu:latest"
 
@@ -29,20 +46,14 @@ build:
   image: $CI_BUILD_IMAGE
   stage: build
   services:
-    - name: docker:dind
-      entrypoint: ["env", "-u", "DOCKER_HOST"]
-      command: ["dockerd-entrypoint.sh"]
-  variables:
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_DRIVER: overlay2
-    # See https://github.com/docker-library/docker/pull/166
-    DOCKER_TLS_CERTDIR: ""
+    - docker:dind
   retry: 2
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
-    # Use docker-container driver to allow useful features (push/multi-platform)
     - update-binfmts --enable # Important: Ensures execution of other binary formats is enabled in the kernel
-    - docker buildx create --driver docker-container --use
+    # Use docker-container driver to allow useful features (push/multi-platform)
+    - docker context create MyContext
+    - docker buildx create --driver docker-container --name MyContext --use MyContext
     - docker buildx inspect --bootstrap
   script:
     - docker buildx ls

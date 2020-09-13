@@ -15,16 +15,23 @@ variables:
   DEBIAN_FRONTEND: 'noninteractive'
   TERM: 'linux'
 
+stages:
+  - build
+  - release
+
 .init:
+  interruptible: true
   image: ${CI_BUILD_IMAGE}
   before_script:
     - apt-get update
-    - apt-get install -y --no-install-recommends \
-        apt-transport-https \
-        ca-certificates \
-        curl \
-        gnupg2 \
-        software-properties-common
+    - |
+        set -xeu; \
+        apt-get install -y --no-install-recommends \
+          apt-transport-https \
+          ca-certificates \
+          curl \
+          gnupg2 \
+          software-properties-common
     - curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
     - add-apt-repository "deb https://download.docker.com/linux/debian $(lsb_release -cs) stable"
     - apt-get update
@@ -63,7 +70,6 @@ build:dev:
   except:
     refs:
       - tags
-  interruptible: true
   script:
     - find . -name build.sh -maxdepth 1 -exec sh {} ';'
     - export TAG="dev-master"
@@ -88,14 +94,11 @@ build:dev:
 
 build:release:
   extends:
-    - .build-template
+    - .init
   stage: release
-  environment:
-    name: production
   only:
     refs:
       - tags
-  interruptible: true
   script:
     - find . -name build.sh -maxdepth 1 -exec sh {} \;
     # Use the tag `latest` and the actual git tag for all the tags

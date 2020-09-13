@@ -19,6 +19,9 @@ stages:
   - build
   - release
 
+services:
+  - docker:dind
+
 .init:
   interruptible: true
   image: ${CI_BUILD_IMAGE}

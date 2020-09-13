@@ -1,6 +1,7 @@
 variables:
-# Job Settings
+# Job and build settings
   CI_BUILD_IMAGE: "debian:stable-slim"
+  CI_BUILDX_ARCHS: 'linux/amd64,linux/arm64'
 # Docker and BuildKit variables
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: "/certs"
@@ -8,9 +9,8 @@ variables:
   DOCKER_TLS: 'true'
   DOCKER_HOST: tcp://docker:2376/
   BUILDKIT_INLINE_CACHE: '1'
+# Dockerhub variables
   DOCKERHUB_REPO_NAME: docker-buildx-qemu
-# Build variables
-  CI_BUILDX_ARCHS: 'linux/amd64,linux/arm64'
 # Debian variables
   DEBIAN_FRONTEND: 'noninteractive'
   TERM: 'linux'
@@ -26,9 +26,9 @@ services:
   interruptible: true
   image: ${CI_BUILD_IMAGE}
   before_script:
+    - set -xeu
     - apt-get update
     - |
-        set -xeu; \
         apt-get install -y --no-install-recommends \
           apt-transport-https \
           ca-certificates \
@@ -39,7 +39,6 @@ services:
     - add-apt-repository "deb https://download.docker.com/linux/debian $(lsb_release -cs) stable"
     - apt-get update
     - |
-        set -xeu; \
         apt-get install -y --no-install-recommends \
         docker-ce-cli \
         binfmt-support \
@@ -48,7 +47,6 @@ services:
         jq
     - mkdir -p ~/.docker/cli-plugins
     - |
-        set -xeu; \
         curl -s https://api.github.com/repos/docker/buildx/releases/latest \
         | grep "browser_download_url.*linux-$(dpkg --print-architecture)" | cut -d : -f 2,3 | tr -d \" \
         | xargs curl -sL -o ~/.docker/cli-plugins/docker-buildx
@@ -61,9 +59,11 @@ services:
     - docker buildx inspect --bootstrap
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "${CI_REGISTRY_USER}" --password-stdin "${CI_REGISTRY}"
     - |
-        set -xe; \
-        if [ -n "${DOCKERHUB_USERNAME}" ]  && [ -n "${DOCKERHUB_PASSWORD}" ] && [ -n "${DOCKERHUB_REPO_NAME}" ]; then \
-          echo "${DOCKERHUB_PASSWORD}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin \
+        if [ -n "${DOCKERHUB_USERNAME:-}" ] \
+        && [ -n "${DOCKERHUB_PASSWORD:-}" ] \
+        && [ -n "${DOCKERHUB_REPO_NAME:-}" ] \
+        ; then \
+          echo "${DOCKERHUB_PASSWORD}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin; \
         fi
 
 build:dev:
@@ -81,12 +81,10 @@ build:dev:
     - export IMAGE="${CI_REGISTRY_IMAGE}:${TAG}"
     - export DESTINATION="--tag=${IMAGE}"
     - |
-      set -ex; \
-      if [[ ( -n "${DOCKERHUB_REPO_NAME}" ) && ( -n "${DOCKERHUB_PASSWORD}" ) ]]; then \
+      if [[ ( -n "${DOCKERHUB_REPO_NAME:-}" ) && ( -n "${DOCKERHUB_PASSWORD:-}" ) ]]; then \
         export DESTINATION="${DESTINATION} --tag=${DOCKERHUB_REPO_PREFIX}/${DOCKERHUB_REPO_NAME}:${TAG}"; \
       fi
     - |
-      set -exu; \
       docker buildx build \
         --platform=$CI_BUILDX_ARCHS \
         --progress=plain \
@@ -109,14 +107,11 @@ build:release:
     - export DESTINATION="--tag=${IMAGE}"
     - export DESTINATION="${DESTINATION} --tag=${CI_REGISTRY_IMAGE}:latest"
     - |
-      set -xe; \
-      if [[ ( -n "${DOCKERHUB_REPO_NAME}" ) && ( -n "${DOCKERHUB_PASSWORD}" ) ]]; then
-        export DESTINATION="${DESTINATION} --tag=${DOCKERHUB_REPO_PREFIX}/${DOCKERHUB_REPO_NAME}:${CI_COMMIT_REF_NAME}"
-        export DESTINATION="${DESTINATION} --tag=${DOCKERHUB_REPO_PREFIX}/${DOCKERHUB_REPO_NAME}:latest"
+      if [[ ( -n "${DOCKERHUB_REPO_NAME:-}" ) && ( -n "${DOCKERHUB_PASSWORD:-}" ) ]]; then \
+        export DESTINATION="${DESTINATION} --tag=${DOCKERHUB_REPO_PREFIX}/${DOCKERHUB_REPO_NAME}:${CI_COMMIT_REF_NAME}"; \
+        export DESTINATION="${DESTINATION} --tag=${DOCKERHUB_REPO_PREFIX}/${DOCKERHUB_REPO_NAME}:latest"; \
       fi
-    - export CI_BUILDX_ARCHS="$(cat /tmp/${CI_PROJECT_NAME}-${CI_COMMIT_SHA}-platforms)"
     - |
-      set -exu; \
       docker buildx build \
         --platform=$CI_BUILDX_ARCHS \
         --progress=plain \

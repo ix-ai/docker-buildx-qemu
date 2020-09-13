@@ -1,7 +1,134 @@
 variables:
+# Job and build settings
+  CI_BUILD_IMAGE: "debian:stable-slim"
+  CI_BUILDX_ARCHS: 'linux/amd64,linux/arm64'
+# Docker and BuildKit variables
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_CERT_PATH: "/certs/client"
+  DOCKER_TLS: 'true'
+  DOCKER_HOST: tcp://docker:2376/
+  BUILDKIT_INLINE_CACHE: '1'
+# Dockerhub variables
   DOCKERHUB_REPO_NAME: docker-buildx-qemu
-  ENABLE_ARM64: 'true'
+# Debian variables
+  DEBIAN_FRONTEND: 'noninteractive'
+  TERM: 'linux'
 
-include:
-  - project: 'ix.ai/ci-templates'
-    file: '/common.yml'
+stages:
+  - build
+  - release
+
+services:
+  - docker:dind
+
+.init:
+  interruptible: true
+  image: ${CI_BUILD_IMAGE}
+  before_script:
+    - set -xeu
+    - apt-get update
+    - |
+        apt-get install -y --no-install-recommends \
+          apt-transport-https \
+          ca-certificates \
+          curl \
+          gnupg2 \
+          software-properties-common
+    - curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+    - add-apt-repository "deb https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+    - apt-get update
+    - |
+        apt-get install -y --no-install-recommends \
+        docker-ce-cli \
+        binfmt-support \
+        qemu-user-static \
+        git \
+        jq
+    - mkdir -p ~/.docker/cli-plugins
+    - |
+        curl -s https://api.github.com/repos/docker/buildx/releases/latest \
+        | grep "browser_download_url.*linux-$(dpkg --print-architecture)" | cut -d : -f 2,3 | tr -d \" \
+        | xargs curl -sL -o ~/.docker/cli-plugins/docker-buildx
+    - chmod a+x ~/.docker/cli-plugins/docker-buildx;
+    - export BUILDX_NAME="buildx-$(tr -cd '[:alnum:]' < /dev/urandom | fold -w6 | head -n1)"
+    - docker version && docker buildx version
+    - docker context create "${BUILDX_NAME}"
+    - update-binfmts --enable # Important: Ensures execution of other binary formats is enabled in the kernel
+    - docker buildx create --driver docker-container --name "${BUILDX_NAME}" --use "${BUILDX_NAME}"
+    - docker buildx inspect --bootstrap
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "${CI_REGISTRY_USER}" --password-stdin "${CI_REGISTRY}"
+    - |
+        if [ -n "${DOCKERHUB_USERNAME:-}" ] \
+        && [ -n "${DOCKERHUB_PASSWORD:-}" ] \
+        && [ -n "${DOCKERHUB_REPO_NAME:-}" ] \
+        ; then \
+          echo "${DOCKERHUB_PASSWORD}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin; \
+        fi
+
+build:dev:
+  extends:
+    - .init
+  stage: build
+  except:
+    refs:
+      - tags
+  script:
+    - find . -name build.sh -maxdepth 1 -exec sh {} ';'
+    - export TAG="dev-master"
+    # Use the tag `dev-master` if there's a commit to master, else use `dev-branch` for feature branches
+    - if [ ! "${CI_COMMIT_REF_NAME}" == "master" ]; then export TAG="dev-branch"; fi
+    - export IMAGE="${CI_REGISTRY_IMAGE}:${TAG}"
+    - export DESTINATION="--tag=${IMAGE}"
+    - |
+      if [[ ( -n "${DOCKERHUB_REPO_NAME:-}" ) && ( -n "${DOCKERHUB_PASSWORD:-}" ) ]]; then \
+        export DESTINATION="${DESTINATION} --tag=${DOCKERHUB_REPO_PREFIX}/${DOCKERHUB_REPO_NAME}:${TAG}"; \
+      fi
+    - |
+      docker buildx build \
+        --platform=$CI_BUILDX_ARCHS \
+        --progress=plain \
+        --cache-from=${CI_REGISTRY_IMAGE}:cache \
+        --cache-to=${CI_REGISTRY_IMAGE}:cache \
+        --pull ${DESTINATION} \
+        --push .
+
+build:release:
+  extends:
+    - .init
+  stage: release
+  only:
+    refs:
+      - tags
+  script:
+    - find . -name build.sh -maxdepth 1 -exec sh {} \;
+    # Use the tag `latest` and the actual git tag for all the tags
+    - export IMAGE="${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}"
+    - export DESTINATION="--tag=${IMAGE}"
+    - export DESTINATION="${DESTINATION} --tag=${CI_REGISTRY_IMAGE}:latest"
+    - |
+      if [[ ( -n "${DOCKERHUB_REPO_NAME:-}" ) && ( -n "${DOCKERHUB_PASSWORD:-}" ) ]]; then \
+        export DESTINATION="${DESTINATION} --tag=${DOCKERHUB_REPO_PREFIX}/${DOCKERHUB_REPO_NAME}:${CI_COMMIT_REF_NAME}"; \
+        export DESTINATION="${DESTINATION} --tag=${DOCKERHUB_REPO_PREFIX}/${DOCKERHUB_REPO_NAME}:latest"; \
+      fi
+    - |
+      docker buildx build \
+        --platform=$CI_BUILDX_ARCHS \
+        --progress=plain \
+        --cache-from=${CI_REGISTRY_IMAGE}:cache \
+        --cache-to=${CI_REGISTRY_IMAGE}:cache \
+        --pull ${DESTINATION} \
+        --push .
+
+dockerhub:readme:
+  stage: release
+  variables:
+    README_PATH: ${CI_PROJECT_DIR}/README.md
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "master" && $DOCKERHUB_REPO_NAME =~ /.+/ && $DOCKERHUB_PASSWORD =~ /.+/'
+      when: on_success
+  image:
+    name: sheogorath/readme-to-dockerhub:latest
+    entrypoint: ['']
+  script:
+    - node /app/index.js

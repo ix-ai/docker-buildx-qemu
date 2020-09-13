@@ -33,7 +33,7 @@ RUN set -eux; \
   echo Running on $ARCH; \
   curl -s https://api.github.com/repos/docker/buildx/releases/latest \
     | grep "browser_download_url.*linux-$ARCH" | cut -d : -f 2,3 | tr -d \" \
-    | xargs curl -L -o ~/.docker/cli-plugins/docker-buildx \
+    | xargs curl -sL -o ~/.docker/cli-plugins/docker-buildx \
   ; \
   chmod a+x ~/.docker/cli-plugins/docker-buildx; \
   \

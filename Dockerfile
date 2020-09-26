@@ -1,8 +1,5 @@
 FROM debian:stable-slim as BUILDER
 
-# TODO disable this flag once it's not needed for `buildx` anymore
-ENV DOCKER_CLI_EXPERIMENTAL=enabled
-
 FROM debian:stable-slim
 LABEL maintainer="docker@ix.ai" \
       ai.ix.repository="ix.ai/docker-buildx-qemu"
@@ -43,5 +40,7 @@ RUN set -eux; \
   apt-get -y --purge autoremove; \
   rm -rf /var/lib/apt/lists/* /var/log/* /var/tmp/* /tmp/*; \
   \
-  docker --version; \
+# TODO disable this flag once it's not needed for `buildx` anymore
+  mkdir -p ~/.docker; \
+  echo '{"experimental":"enabled"}' > ~/.docker/config.json; \
   docker buildx version

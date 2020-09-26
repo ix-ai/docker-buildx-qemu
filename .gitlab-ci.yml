@@ -9,6 +9,7 @@ variables:
   DOCKER_TLS: 'true'
   DOCKER_HOST: tcp://docker:2376/
   BUILDKIT_INLINE_CACHE: '1'
+  DOCKER_CLI_EXPERIMENTAL: 'enabled'
 # Dockerhub variables
   DOCKERHUB_REPO_NAME: docker-buildx-qemu
 # Debian variables
@@ -31,26 +32,21 @@ services:
     - |
         apt-get install -y --no-install-recommends \
           apt-transport-https \
-          ca-certificates \
-          curl \
           gnupg2 \
-          software-properties-common
+          software-properties-common \
+          \
+          ca-certificates \
+          \
+          binfmt-support \
+          qemu-user-static \
+          \
+          git \
+          jq \
+          curl
     - curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
     - add-apt-repository "deb https://download.docker.com/linux/debian $(lsb_release -cs) stable"
     - apt-get update
-    - |
-        apt-get install -y --no-install-recommends \
-        docker-ce-cli \
-        binfmt-support \
-        qemu-user-static \
-        git \
-        jq
-    - mkdir -p ~/.docker/cli-plugins
-    - |
-        curl -s https://api.github.com/repos/docker/buildx/releases/latest \
-        | grep "browser_download_url.*linux-$(dpkg --print-architecture)" | cut -d : -f 2,3 | tr -d \" \
-        | xargs curl -sL -o ~/.docker/cli-plugins/docker-buildx
-    - chmod a+x ~/.docker/cli-plugins/docker-buildx;
+    - apt-get install -y --no-install-recommends docker-ce-cli
     - export BUILDX_NAME="buildx-$(tr -cd '[:alnum:]' < /dev/urandom | fold -w6 | head -n1)"
     - docker version && docker buildx version
     - docker context create "${BUILDX_NAME}"

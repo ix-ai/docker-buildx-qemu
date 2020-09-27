@@ -1,7 +1,7 @@
 variables:
 # Job and build settings
   CI_BUILD_IMAGE: "debian:stable-slim"
-  CI_BUILDX_ARCHS: 'linux/amd64,linux/arm64'
+  CI_BUILDX_ARCHS: 'linux/amd64,linux/arm64,linux/arm/7'
 # Docker and BuildKit variables
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: "/certs"
@@ -27,7 +27,8 @@ services:
   interruptible: true
   image: ${CI_BUILD_IMAGE}
   before_script:
-    - set -xeu
+    - cp debian-backports-pin-600.pref /etc/apt/preferences.d/
+    - cp debian-backports.list /etc/apt/sources.list.d/
     - apt-get update
     - |
         apt-get install -y --no-install-recommends \
@@ -37,18 +38,22 @@ services:
           \
           ca-certificates \
           \
-          binfmt-support \
-          qemu-user-static \
-          \
           git \
           jq \
-          curl
+          curl \
+          \
+          binfmt-support \
+          qemu-user-static
+    # Workaround for https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=923479
+    - c_rehash
     - curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
     - add-apt-repository "deb https://download.docker.com/linux/debian $(lsb_release -cs) stable"
     - apt-get update
-    - apt-get install -y --no-install-recommends docker-ce-cli
+    - |
+        apt-get install -y  --no-install-recommends \
+          docker-ce-cli
     - export BUILDX_NAME="buildx-$(tr -cd '[:alnum:]' < /dev/urandom | fold -w6 | head -n1)"
-    - docker version && docker buildx version
+    - docker version && docker buildx version && qemu-x86_64-static --version
     - docker context create "${BUILDX_NAME}"
     - update-binfmts --enable # Important: Ensures execution of other binary formats is enabled in the kernel
     - docker buildx create --driver docker-container --name "${BUILDX_NAME}" --use "${BUILDX_NAME}"
@@ -81,6 +86,7 @@ build:dev:
         export DESTINATION="${DESTINATION} --tag=${DOCKERHUB_REPO_PREFIX}/${DOCKERHUB_REPO_NAME}:${TAG}"; \
       fi
     - |
+      set -x; \
       docker buildx build \
         --platform=$CI_BUILDX_ARCHS \
         --progress=plain \
@@ -108,6 +114,7 @@ build:release:
         export DESTINATION="${DESTINATION} --tag=${DOCKERHUB_REPO_PREFIX}/${DOCKERHUB_REPO_NAME}:latest"; \
       fi
     - |
+      set -x; \
       docker buildx build \
         --platform=$CI_BUILDX_ARCHS \
         --progress=plain \

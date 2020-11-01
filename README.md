@@ -10,7 +10,7 @@
 This Debian-slim-based image allows you to easily build cross-platform images.
 It's been tested with GitLab CI on gitlab.com, but it should work anywhere that docker-in-docker already works, and with a `binfmt_misc` enabled kernel.
 
-The `ixdotai/docker-buildx-qemu` image supports the following architectures:
+The `registry.gitlab.com/ix.ai/docker-buildx-qemu` image supports the following architectures:
 * `amd64`
 * `arm64`
 
@@ -40,7 +40,7 @@ variables:
   BUILDKIT_INLINE_CACHE: '1'
   DOCKER_DRIVER: overlay2
   CI_BUILD_ARCHS: "linux/arm/v7,linux/arm64,linux/amd64"
-  CI_BUILD_IMAGE: "ixdotai/docker-buildx-qemu:latest"
+  CI_BUILD_IMAGE: "registry.gitlab.com/ix.ai/docker-buildx-qemu:latest"
 
 build:
   image: $CI_BUILD_IMAGE
@@ -77,6 +77,12 @@ And the (partial) output:
 * GitLab: https://gitlab.com/ix.ai/docker-buildx-qemu
 * GitHub: https://github.com/ix-ai/docker-buildx-qemu
 * Docker Hub: https://hub.docker.com/r/ixdotai/docker-buildx-qemu
+
+### Registry
+
+This image can be found on both GitLab Registry and Docker Hub:
+* `registry.gitlab.com/ix.ai/docker-buildx-qemu`
+* `ixdotai/docker-buildx-qemu`
 
 ## Credits:
 This work is based on [ericvh/docker-buildx-qemu](https://gitlab.com/ericvh/docker-buildx-qemu)

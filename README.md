@@ -13,6 +13,7 @@ It's been tested with GitLab CI on gitlab.com, but it should work anywhere that 
 The `registry.gitlab.com/ix.ai/docker-buildx-qemu` image supports the following architectures:
 * `amd64`
 * `arm64`
+* `arm/v7`
 
 The following additional tools are installed, to be used in your pipelines:
 * `curl`

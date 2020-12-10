@@ -1,3 +1,4 @@
+---
 variables:
 # Job and build settings
   CI_BUILD_IMAGE: "debian:stable-slim"
@@ -90,9 +91,7 @@ build:dev:
       docker buildx build \
         --platform=$CI_BUILDX_ARCHS \
         --progress=plain \
-        --cache-from=${CI_REGISTRY_IMAGE}:cache \
-        --cache-to=${CI_REGISTRY_IMAGE}:cache \
-        --pull ${DESTINATION} \
+        ${DESTINATION} \
         --push .
 
 build:release:
@@ -118,9 +117,7 @@ build:release:
       docker buildx build \
         --platform=$CI_BUILDX_ARCHS \
         --progress=plain \
-        --cache-from=${CI_REGISTRY_IMAGE}:cache \
-        --cache-to=${CI_REGISTRY_IMAGE}:cache \
-        --pull ${DESTINATION} \
+        ${DESTINATION} \
         --push .
 
 dockerhub:readme:
